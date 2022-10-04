@@ -1,0 +1,29 @@
+{
+"name": "xqclip",
+"version": "0.0.1",
+"description": "This is a js package that provides image cutting and export.",
+"main": "lib/vue/xqclip.js",
+"directories": {
+    "lib": "lib",
+    "test": "test"
+},
+"scripts": {
+    "test": "echo Error: no test specified && exit 1",
+    "test:browser": "live-server --host=localhost"
+},
+"repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitguanqi/xqclip.git"
+},
+"keywords": [
+    "clip",
+    "xqclip"
+],
+"author": "gitguanqi",
+"license": "MIT",
+"bugs": {
+    "url": "https://github.com/gitguanqi/xqclip/issues"
+},
+"homepage": "https://github.com/gitguanqi/xqclip#readme"
+}          
+        

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xqclip browser test</title>
+    <link rel="stylesheet" href="../lib/css/clip.min.css">
+    <style>
+        #preview-img {
+            display: block;
+            margin: 20px;
+        }
+        #download {
+            color: rgb(121, 11, 11);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>xqclip browser test</h3>
+    <p>使用方法：</p>
+    <ul>
+        <li>
+            1.引入css和js
+        </li>
+        <li>
+            2.new一个方法，传入参数
+        </li>
+        <li>
+            3.开始体验。
+        </li>
+    </ul>
+    <div class="corp"></div>
+    <img id="preview-img" class="clip-bg">
+    <button id="change">切换图片</button>
+    <a id="download">下载图片</a>
+    <script src="../lib/js/xqclip.min.js"></script>
+    <script>
+        let clip = new xqclip({
+            box: '.corp',
+            boxWin: 300,
+            boxHei: 300,
+            url: './img/a1.jpg',
+            pre: '#preview-img',
+            scale: 16/16,
+            showPos: true,
+            scaleImg: true,
+        });
+
+        let downloadBtn = document.getElementById('download');
+        let changeBtn = document.getElementById('change');
+        let previewImg = document.getElementById('preview-img');
+        downloadBtn.onclick = function () {  
+            if (previewImg.src == '') return;
+            this.href = previewImg.src;
+            this.download = new Date().getTime();
+        }
+
+        changeBtn.addEventListener('click', function () {
+            clip.replaceImg('./img/a2.png');
+        })
+    </script>
+</body>
+
+</html>   
+                
