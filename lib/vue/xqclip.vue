@@ -206,6 +206,7 @@ export default {
             let that = this;
             let img = new Image();
             img.src = that.imgSrc;
+            img.crossOrigin = "Anonymous";
             img.onload = function () {
                 let imgWin = 0;
                 let imgHei = 0;
