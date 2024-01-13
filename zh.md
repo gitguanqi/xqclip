@@ -12,9 +12,9 @@
 
 ```html
 <!-- Css -->
-<script src="https://unpkg.com/xqclip/lib/css/xqclip.min.css"></script>
+<script src="https://xqgj.cc/xqcdn/libs/xqclip/css/xqclip.min.css"></script>
 <!-- Browser -->
-<script src="https://unpkg.com/xqclip/lib/js/xqclip.min.js"></script>
+<script src="https://xqgj.cc/xqcdn/libs/xqclip/js/xqclip.min.js"></script>
 <!-- es module -->
 <script type="module">
     import xqclip from '../lib/js/xqclip-esm.min.js';
@@ -141,6 +141,8 @@ export default {
 ## 查看示例
 
 运行这个脚本查看展示案例：`npm run test:browser`。
+
+![test](https://xqgj.cc/xqclip/test/img/xqclip.jpg)
 
 ## 提问题
 
