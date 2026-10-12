@@ -1,6 +1,6 @@
 {
 "name": "xqclip",
-"version": "0.0.4",
+"version": "0.0.5",
 "description": "This is a js package that provides image cutting and export.",
 "main": "lib/vue/xqclip.js",
 "module": "lib/js/xqclip-esm.min.js",
