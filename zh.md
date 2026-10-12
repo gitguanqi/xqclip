@@ -57,15 +57,16 @@ let clip = new xqclip({
 let downloadBtn = document.getElementById('download');
 let changeBtn = document.getElementById('change');
 let previewImg = document.getElementById('preview-img');
-downloadBtn.onclick = function () {  
-    if (previewImg.src == '') return;
-    this.href = previewImg.src;
-    this.download = new Date().getTime();
-}
+downloadBtn.addEventListener('click', function () {
+    let url = previewImg.src;
+    if (!url || url.indexOf('data:') !== 0) return;
+    this.href = url;
+    this.download = 'xqclip-' + new Date().getTime() + '.jpg';
+});
 
 changeBtn.addEventListener('click', function () {
     clip.replaceImg('./img/a2.png');
-})
+});
 ```
 
 ### vue
@@ -125,13 +126,13 @@ export default {
             extName = extName.indexOf('?') > -1 ? extName.split('?')[0] : extName;
             let data = await fetch(url);
             let blob = await data.blob();
-            let donwBtn = document.createElement('a');
-            donwBtn.download = name || 'xqgjs-'+extName;
-            donwBtn.href = URL.createObjectURL(blob);
-            document.body.appendChild(donwBtn);
-            donwBtn.click();
-            URL.revokeObjectURL(blob);
-            document.body.removeChild(donwBtn);
+            let downBtn = document.createElement('a');
+            downBtn.download = 'xqgjs-' + extName;
+            downBtn.href = URL.createObjectURL(blob);
+            document.body.appendChild(downBtn);
+            downBtn.click();
+            document.body.removeChild(downBtn);
+            URL.revokeObjectURL(downBtn.href);
         },
     }
 

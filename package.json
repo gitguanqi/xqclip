@@ -3,12 +3,26 @@
 "version": "0.0.4",
 "description": "This is a js package that provides image cutting and export.",
 "main": "lib/vue/xqclip.js",
+"module": "lib/js/xqclip-esm.min.js",
+"browser": "lib/js/xqclip.min.js",
+"unpkg": "lib/js/xqclip.min.js",
+"exports": {
+    ".": {
+        "import": "./lib/js/xqclip-esm.min.js",
+        "require": "./lib/js/xqclip.min.js",
+        "default": "./lib/js/xqclip.min.js"
+    },
+    "./lib/vue/xqclip.vue": "./lib/vue/xqclip.vue",
+    "./css/xqclip.css": "./lib/css/xqclip.css",
+    "./css/xqclip.min.css": "./lib/css/xqclip.min.css",
+    "./package.json": "./package.json"
+},
 "directories": {
     "lib": "lib",
     "test": "test"
 },
 "scripts": {
-    "test": "echo Error: no test specified && exit 1",
+    "test": "echo Error: no automated tests configured",
     "test:browser": "live-server --host=localhost"
 },
 "repository": {

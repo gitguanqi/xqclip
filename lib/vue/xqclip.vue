@@ -2,7 +2,7 @@
     <!-- xqclip -->
     <div class="clip-box clip-bg" ref="clipBox">
         <!-- 画布区域 -->
-        <canvas id="clip-img" class="clip-bg" ref="clipImg"></canvas>
+        <canvas class="clip-bg clip-canvas" ref="clipImg"></canvas>
         <!-- 阴影区域 -->
         <div
             class="clip-img-shadow clip-img-shadow-top"
@@ -40,11 +40,33 @@
             <small class="clip-img-scale" ref="clipImgScale"></small>
         </div>
         <!-- 临时画布 -->
-        <canvas id="clip-temp" ref="clipTemp"></canvas>
+        <canvas class="clip-canvas-temp" ref="clipTemp"></canvas>
     </div>
 </template>
 
 <script>
+// ̽��������Ƿ�֧�� passive ѡ��ƶ�����Ҫ�� touchmove ����ֹҳ�������
+let supportsPassive = false;
+try {
+    let probe = Object.defineProperty({}, 'passive', {
+        get: function () {
+            supportsPassive = true;
+            return false;
+        },
+    });
+    window.addEventListener('xqclip-passive-probe', null, probe);
+    window.removeEventListener('xqclip-passive-probe', null, probe);
+} catch (e) { }
+
+function preventScroll(e) {
+    if (e.cancelable) {
+        e.preventDefault();
+    }
+}
+
+let wheelScale = 1;
+
+
 export default {
     name: "xqClip",
     props: {
@@ -119,6 +141,8 @@ export default {
                 move: "",
                 end: "",
             },
+            drag: null,
+            _eventsBound: false,
         };
     },
     mounted() {
@@ -176,7 +200,9 @@ export default {
                       move: "mousemove",
                       end: "mouseup",
                   };
-            window.onresize = this.checkMobile;
+            window.onresize = () => {
+                this.checkMobile();
+            };
         },
         // 获取元素
         getElem() {
@@ -189,17 +215,18 @@ export default {
             this.clipShadowLeft = this.$refs.clipImgShadowLeft;
 
             // 创建画布
-            this.clipImg = document.getElementById("clip-img");
+            this.clipImg = this.$refs.clipImg;
             this.clipCxt = this.clipImg.getContext("2d");
             this.clipImg.width = this.boxWin;
             this.clipImg.height = this.boxHei;
             // 创建临时画布
-            this.tempCanvas = document.getElementById("clip-temp");
+            this.tempCanvas = this.$refs.clipTemp;
             this.tempCxt = this.tempCanvas.getContext("2d");
 
             // 加载图片和框以及阴影
             this.loadImg();
             this.calcAreaElem();
+            this.bindEvents();
         },
         // 加载图片
         loadImg() {
@@ -233,47 +260,6 @@ export default {
                 that.drawImg(that.imgInfo);
             };
 
-            if (this.scaleImg) {
-                this.addWheel();
-            }
-        },
-        // 鼠标滚轮计算
-        addWheel() {
-            let that = this;
-            let currentScale = 1;
-            let imgWin = 0;
-            let imgHei = 0;
-            let imgX = 0;
-            let imgY = 0;
-            that.clipBox.addEventListener("wheel", function (e) {
-                let isMouseUp = e.deltaY > 0 ? false : true;
-                if (isMouseUp && currentScale < 3) {
-                    currentScale += 0.2;
-                }
-                if (!isMouseUp && currentScale > 0.4) {
-                    currentScale -= 0.2;
-                }
-                let imgScale =
-                    that.imgInfo.elem.width / that.imgInfo.elem.height;
-                if (imgScale == 1) {
-                    imgWin = (that.boxWin / 2) * currentScale;
-                    imgHei = (that.boxHei / 2) * currentScale;
-                    imgX = ((that.boxWin - imgWin) / 2) * currentScale;
-                } else {
-                    imgWin = that.boxWin * currentScale;
-                    imgHei = (that.boxHei / imgScale) * currentScale;
-                    imgX = 0;
-                }
-                imgY = (that.boxHei - imgHei) / 2;
-                that.imgInfo = {
-                    elem: that.imgInfo.elem,
-                    x: imgX,
-                    y: imgY,
-                    win: imgWin,
-                    hei: imgHei,
-                };
-                that.drawImg(that.imgInfo);
-            });
         },
         // 绘制图片
         drawImg(obj) {
@@ -295,6 +281,7 @@ export default {
             this.imgSrc = url;
             this.loadImg();
             this.calcAreaElem();
+            this.bindEvents();
         },
         // 计算裁剪框
         calcAreaElem() {
@@ -310,9 +297,6 @@ export default {
             // 位置
             this.calcAreaPos();
             this.initShadowElem();
-            // // 添加事件
-            this.clipBoxMove();
-            this.clipAreaScale();
         },
         // 计算裁剪框位置
         calcAreaPos() {
@@ -354,171 +338,171 @@ export default {
             this.clipShadowLeft.style.left = 0;
             this.clipShadowLeft.style.top = 0;
         },
-        // 画布操作
-        clipBoxMove() {
+        // �¼�ֻ��һ�Σ�replaceImg �ظ����ò����ٵ��Ӽ���
+        bindEvents() {
+            if (this._eventsBound) {
+                return;
+            }
+            this._eventsBound = true;
+
             let that = this;
+            let wheelOpt = supportsPassive ? { passive: false } : false;
 
-            // 鼠标按下
-            that.clipBox.addEventListener(
-                that.eventName.start,
-                function (e) {
-                    // 判断是否拉伸按钮
-                    let clsName = e.target.className;
-                    if (clsName == "clip-img-scale") {
-                        return false;
-                    }
+            that.clipBox.addEventListener('wheel', function (e) {
+                let isMouseUp = e.deltaY > 0 ? false : true;
+                if (isMouseUp && wheelScale < 3) {
+                    wheelScale += 0.2;
+                }
+                if (!isMouseUp && wheelScale > 0.4) {
+                    wheelScale -= 0.2;
+                }
+                let imgScale = that.imgInfo.elem.width / that.imgInfo.elem.height;
+                let imgWin = 0;
+                let imgHei = 0;
+                let imgX = 0;
+                if (imgScale == 1) {
+                    imgWin = (that.boxWin / 2) * wheelScale;
+                    imgHei = (that.boxHei / 2) * wheelScale;
+                    imgX = ((that.boxWin - imgWin) / 2) * wheelScale;
+                } else {
+                    imgWin = that.boxWin * wheelScale;
+                    imgHei = (that.boxHei / imgScale) * wheelScale;
+                    imgX = 0;
+                }
+                let imgY = (that.boxHei - imgHei) / 2;
+                that.imgInfo = {
+                    elem: that.imgInfo.elem,
+                    x: imgX,
+                    y: imgY,
+                    win: imgWin,
+                    hei: imgHei,
+                };
+                that.drawImg(that.imgInfo);
+            }, wheelOpt);
 
-                    // 鼠标移动
-                    that.clipBox[`on${that.eventName.move}`] = function (e) {
-                        // 移动坐标
-                        let movePos = {
-                            x: e.clientX,
-                            y: e.clientY,
-                        };
+            that.clipBox.addEventListener(that.eventName.start, function (e) {
+                preventScroll(e);
+                if (e.target.className == 'clip-img-scale') {
+                    return false;
+                }
+                that.drag = {
+                    mode: 'drag',
+                };
+            }, wheelOpt);
 
-                        that.calcAreaPos();
+            that.clipScaleBtn.addEventListener(that.eventName.start, function (e) {
+                preventScroll(e);
+                that.drag = {
+                    mode: 'scale',
+                    startX: e.clientX,
+                    startY: e.clientY,
+                };
+            }, wheelOpt);
 
-                        // 限制范围
-                        let disX = movePos.x - that.clipBoxInfo.left;
-                        let disY = movePos.y - that.clipBoxInfo.top;
-                        let cLeft = disX - that.clipAreaInfo.win / 2;
-                        let cTop = disY - that.clipAreaInfo.win / 2;
-
-                        // 限制范围
-                        if (cLeft < 0) {
-                            cLeft = 0;
-                        }
-
-                        if (
-                            cLeft >
-                            that.clipBoxInfo.win - that.clipAreaInfo.win
-                        ) {
-                            cLeft =
-                                that.clipBoxInfo.win - that.clipAreaInfo.win;
-                        }
-
-                        if (cTop < 0) {
-                            cTop = 0;
-                        }
-
-                        if (
-                            cTop >
-                            that.clipBoxInfo.hei - that.clipAreaInfo.hei
-                        ) {
-                            cTop = that.clipBoxInfo.hei - that.clipAreaInfo.hei;
-                        }
-
-                        // 裁剪框位置
-                        that.clipArea.style.left = cLeft + "px";
-                        that.clipArea.style.top = cTop + "px";
-
-                        // 计算阴影面积
-                        that.calcShadowElem();
-
-                        // 实时保存选取图片
-                        that.getAreaData();
-                    };
-                },
-                false
-            );
-
-            // 鼠标放开
-            that.clipBox.addEventListener(
-                that.eventName.end,
-                function () {
-                    // 取消移动
-                    that.clipBox[`on${that.eventName.move}`] = null;
-                },
-                false
-            );
-        },
-        // 拉伸裁剪框
-        clipAreaScale() {
-            let that = this;
-
-            // 拉伸按钮按下
-            that.clipScaleBtn.addEventListener(
-                that.eventName.start,
-                function (e) {
-                    // 拉伸坐标
-                    let scalePos = {
-                        x: e.clientX,
-                        y: e.clientY,
-                    };
-
-                    // 按钮移动
-                    that.clipBox[`on${that.eventName.move}`] = function (e) {
-                        // 拉伸后坐标
-                        let scaleMovePos = {
-                            x: e.clientX,
-                            y: e.clientY,
-                        };
-
-                        // 移动坐标信息
-                        let moveInfo = {
-                            width: scaleMovePos.x - scalePos.x,
-                            height: scaleMovePos.y - scalePos.y,
-                        };
-
-                        // 获取移动距离
-                        let areaMove = {
-                            win: moveInfo.width + that.clipAreaInfo.win,
-                            hei: moveInfo.height + that.clipAreaInfo.hei,
-                        };
-
-                        // 计算比例
-                        if (that.scale == 1) {
-                            areaMove.win = areaMove.hei = areaMove.win;
-                        }
-                        if (that.scale > 1) {
-                            areaMove.win *= that.scale;
-                        }
-
-                        // 处理边界
-                        if (
-                            areaMove.win >=
-                            (that.clipBoxInfo.win - that.clipAreaInfo.left) *
-                                that.scale
-                        ) {
-                            areaMove.win =
-                                that.clipBoxInfo.win - that.clipAreaInfo.left;
-                        }
-
-                        if (
-                            areaMove.hei >=
-                            (that.clipBoxInfo.hei - that.clipAreaInfo.top) *
-                                that.scale
-                        ) {
-                            areaMove.hei =
-                                that.clipBoxInfo.hei - that.clipAreaInfo.top;
-                        }
-
-                        if (areaMove.win <= that.scaleMinWin) {
-                            areaMove.win = that.scaleMinWin;
-                        }
-
-                        if (areaMove.hei <= that.scaleMinHei) {
-                            areaMove.hei = that.scaleMinHei;
-                        }
-
-                        that.clipArea.style.width = areaMove.win + "px";
-                        that.clipArea.style.height = areaMove.hei + "px";
-
-                        that.calcAreaPos();
-                        that.changeShadowElem(areaMove.win);
-                        that.calcShadowElem();
-                        that.getAreaData();
-                    };
-                },
-                false
-            );
-
-            // 裁切框鼠标放开
-            that.clipScaleBtn.addEventListener(that.eventName.end, function () {
-                // 取消移动
+            that.clipBox[`on${that.eventName.move}`] = function (e) {
+                that.moveArea(e);
+            };
+            that.clipBox.addEventListener(that.eventName.end, function () {
+                that.drag = null;
                 that.clipBox[`on${that.eventName.move}`] = null;
-            });
+            }, false);
         },
+
+        // ��ק��������ƶ�����
+        moveArea(e) {
+            let move = this.drag;
+            if (!move) {
+                return;
+            }
+
+            preventScroll(e);
+
+            let movePos = {
+                x: e.clientX,
+                y: e.clientY,
+            };
+
+            if (move.mode == 'drag') {
+                this.calcAreaPos();
+
+                let disX = movePos.x - this.clipBoxInfo.left;
+                let disY = movePos.y - this.clipBoxInfo.top;
+                let cLeft = disX - this.clipAreaInfo.win / 2;
+                let cTop = disY - this.clipAreaInfo.hei / 2;
+
+                if (cLeft < 0) {
+                    cLeft = 0;
+                }
+                if (cLeft > this.clipBoxInfo.win - this.clipAreaInfo.win) {
+                    cLeft = this.clipBoxInfo.win - this.clipAreaInfo.win;
+                }
+                if (cTop < 0) {
+                    cTop = 0;
+                }
+                if (cTop > this.clipBoxInfo.hei - this.clipAreaInfo.hei) {
+                    cTop = this.clipBoxInfo.hei - this.clipAreaInfo.hei;
+                }
+
+                this.clipArea.style.left = cLeft + 'px';
+                this.clipArea.style.top = cTop + 'px';
+            } else {
+                let moveInfo = {
+                    width: movePos.x - move.startX,
+                    height: movePos.y - move.startY,
+                };
+
+                let areaMove = {
+                    win: moveInfo.width + this.clipAreaInfo.win,
+                    hei: moveInfo.height + this.clipAreaInfo.hei,
+                };
+
+                if (this.scale == 1) {
+                    areaMove.hei = areaMove.win;
+                }
+                if (this.scale > 1) {
+                    areaMove.win = areaMove.win * this.scale;
+                }
+
+                if (areaMove.win >= (this.clipBoxInfo.win - this.clipAreaInfo.left) * this.scale) {
+                    areaMove.win = this.clipBoxInfo.win - this.clipAreaInfo.left;
+                }
+                if (areaMove.hei >= (this.clipBoxInfo.hei - this.clipAreaInfo.top) * this.scale) {
+                    areaMove.hei = this.clipBoxInfo.hei - this.clipAreaInfo.top;
+                }
+                if (areaMove.win <= this.scaleMinWin) {
+                    areaMove.win = this.scaleMinWin;
+                }
+                if (areaMove.hei <= this.scaleMinHei) {
+                    areaMove.hei = this.scaleMinHei;
+                }
+
+                this.clipArea.style.width = areaMove.win + 'px';
+                this.clipArea.style.height = areaMove.hei + 'px';
+
+                this.calcAreaPos();
+                this.changeShadowElem(areaMove.win);
+                this.calcShadowElem();
+            }
+
+            this.getAreaData();
+        },
+
+        // �ü����϶�
+        clipBoxMove() {
+            this.drag = {
+                mode: 'drag',
+            };
+        },
+
+        // ����ü���
+        clipAreaScale(e) {
+            this.drag = {
+                mode: 'scale',
+                startX: e.clientX,
+                startY: e.clientY,
+            };
+        },
+
         // 计算阴影面积
         calcShadowElem() {
             // 上
@@ -674,7 +658,7 @@ export default {
     background-position: 0 0, 15px 15px, 15px 15px, 30px 30px;
 }
 
-#clip-img {
+.clip-canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -682,7 +666,7 @@ export default {
     height: 100%;
 }
 
-#clip-temp {
+.clip-canvas-temp {
     opacity: 0;
 }
 
