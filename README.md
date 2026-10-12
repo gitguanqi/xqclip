@@ -12,18 +12,20 @@ import cdn
 
 ```html
 <!-- Css -->
-<script src="https://xqgj.cc/xqcdn/libs/xqclip/css/xqclip.min.css"></script>
+<link rel="stylesheet" href="https://xqgj.cc/xqcdn/libs/xqclip/css/xqclip.min.css">
 <!-- Browser -->
 <script src="https://xqgj.cc/xqcdn/libs/xqclip/js/xqclip.min.js"></script>
 <!-- es module -->
 <script type="module">
-    import xqclip from '../lib/js/xqclip-esm.min.js';
+    import xqclip from 'https://xqgj.cc/xqcdn/libs/xqclip/js/xqclip-esm.min.js';
 </script>
 ```
 
-**Vue**:
+**npm**:
 
 ```sh
+pnpm add xqclip
+# or
 npm i xqclip
 ```
 
@@ -69,12 +71,48 @@ changeBtn.addEventListener('click', function () {
 });
 ```
 
+`pre` is optional: without it the widget still renders and only the preview
+image is skipped. The cropped region is available at any time through
+`clip.getCanvasImgData()`, which returns `{ base64, blob, file }` after the
+first selection change, and `onChange` receives the same object.
+
+### typescript
+
+The package ships its own declarations, so the options and the crop data are
+typed without extra setup:
+
+```ts
+import XqClip from 'xqclip';
+import type { ClipData, XqClipOptions } from 'xqclip';
+
+const options: XqClipOptions = {
+    box: '.corp',
+    url: './img/a1.jpg',
+    pre: '#preview-img',
+    onChange(data: ClipData) {
+        console.log(data.base64, data.file);
+    },
+};
+const clip = new XqClip(options);
+```
+
 ### vue
 
-+ import npm
+The Vue entry is one component and one plugin that work on Vue 2 and Vue 3.
 
 ```js
-import xqClip from "xqclip";
+// Vue 3
+import { createApp } from 'vue';
+import xqClip from 'xqclip/vue';
+
+createApp(App).use(xqClip);
+```
+
+```js
+// Vue 2
+import Vue from 'vue';
+import xqClip from 'xqclip/vue';
+
 Vue.use(xqClip);
 ```
 
@@ -82,66 +120,69 @@ Vue.use(xqClip);
 
 ```html
 <div class="clip-bg" style="position:relative;">
-    <xq-clip ref="clip" :options="clipOptions"></xq-clip>
-    <img ref="preview" id="small-img" src="" alt="">
-    <button @click="toggleImg">toggle</button>
-    <button @click="downloadImg">download</button>
+    <xq-clip ref="clip" v-model="url" :options="clipOptions" @change="onClip"></xq-clip>
+    <img id="small-img" src="" alt="">
+    <button @click="replaceImg">toggle img</button>
 </div>
 ```
 
-+ call method
++ call
 
 ```js
 export default {
     name: 'demo',
     data () {
         return {
+            url: '/img/t1.jpg',
             clipOptions: {
                 boxWin: 400,
                 boxHei: 400,
-                url: "",
-                pre: "#small-img",
+                pre: '#small-img',
                 scale: 16 / 16,
                 showPos: true,
                 scaleImg: true,
             },
         }
     },
-    mounted () {
-        this.initClip();
-    },
     methods: {
-        initClip () {
-            let url = '/img/t1.jpg';
-            this.$refs.clip.replaceImg(url);
+        onClip (data) {
+            console.log(data.base64, data.file);
         },
-        toggleImg () {
-            let url = '/img/t2.png';
-            this.$refs.clip.replaceImg(url);
+        replaceImg () {
+            this.$refs.clip.replaceImg('/img/t2.png');
         },
-        async downloadImg () {
-            let url = this.$refs.preview.src;
-            let extName = url.split('/');
-            extName = extName[extName.length-1];
-            extName = extName.indexOf('?') > -1 ? extName.split('?')[0] : extName;
-            let data = await fetch(url);
-            let blob = await data.blob();
-            let downBtn = document.createElement('a');
-            downBtn.download = 'xqgjs-' + extName;
-            downBtn.href = URL.createObjectURL(blob);
-            document.body.appendChild(downBtn);
-            downBtn.click();
-            document.body.removeChild(downBtn);
-            URL.revokeObjectURL(downBtn.href);
+        reset () {
+            this.$refs.clip.reset();
         },
     }
-
 }
 ```
 
+The component props are `options` (the same configuration the browser build
+takes, except `box`: the component owns its host element), `modelValue`, and the
+legacy `url`. Both v-model contracts are covered: `modelValue` is preferred and
+the Vue 2 `model` option maps `v-model` onto it, so `v-model` binds the source
+image url on either major. `replaceImg()` keeps that binding in sync.
+
+Events: `ready` (the core instance is mounted), `change` (a crop was produced),
+and `update:modelValue`. Methods: `replaceImg(url)`, `reset()`,
+`getCanvasImgData()`, and `getInstance()`.
+
+The component's stylesheet is imported by the SFC itself. Consumers who mount
+the raw SFC instead of the plugin use
+`import XqClip from 'xqclip/lib/vue/xqclip.vue'`; it ships uncompiled, so a
+Vue-aware bundler is required, exactly as for `xqclip/vue`.
+
+Earlier versions exported the Vue plugin from the package root. The root export
+is now the browser class (`import XqClip from 'xqclip'`), and the plugin moved to
+`xqclip/vue`.
+
 ## View xqclip
 
-Run this script to view the demonstration case: `npm run test:browser`.
+Run this script to view the demonstration case: `pnpm test:browser`.
+
+Run `pnpm test` for the DOM behavior harness and the bundle checks, and
+`pnpm typecheck` for the TypeScript sources.
 
 ![test](https://xqgj.cc/xqclip/test/img/xqclip.jpg)
 

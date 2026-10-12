@@ -1,43 +1,62 @@
 {
-"name": "xqclip",
-"version": "0.0.5",
-"description": "This is a js package that provides image cutting and export.",
-"main": "lib/vue/xqclip.js",
-"module": "lib/js/xqclip-esm.min.js",
-"browser": "lib/js/xqclip.min.js",
-"unpkg": "lib/js/xqclip.min.js",
-"exports": {
+  "name": "xqclip",
+  "version": "0.1.0",
+  "description": "This is a js package that provides image cutting and export.",
+  "main": "lib/js/xqclip.js",
+  "module": "lib/js/xqclip-esm.mjs",
+  "types": "lib/types/index.d.ts",
+  "browser": "lib/js/xqclip.min.js",
+  "unpkg": "lib/js/xqclip.min.js",
+  "jsdelivr": "lib/js/xqclip.min.js",
+  "files": [
+    "lib",
+    "zh.md"
+  ],
+  "exports": {
     ".": {
-        "import": "./lib/js/xqclip-esm.min.js",
-        "require": "./lib/js/xqclip.min.js",
-        "default": "./lib/js/xqclip.min.js"
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/js/xqclip-esm.mjs",
+      "require": "./lib/js/xqclip.js",
+      "default": "./lib/js/xqclip.js"
     },
-    "./lib/vue/xqclip.vue": "./lib/vue/xqclip.vue",
+    "./vue": {
+      "types": "./lib/types/vue/index.d.ts",
+      "import": "./lib/vue/xqclip.js",
+      "default": "./lib/vue/xqclip.js"
+    },
     "./css/xqclip.css": "./lib/css/xqclip.css",
     "./css/xqclip.min.css": "./lib/css/xqclip.min.css",
+    "./lib/*": "./lib/*",
     "./package.json": "./package.json"
-},
-"directories": {
+  },
+  "directories": {
     "lib": "lib",
     "test": "test"
-},
-"scripts": {
-    "test": "echo Error: no automated tests configured",
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "node scripts/build.mjs",
+    "pretest": "node scripts/build.mjs",
+    "test": "node --test",
     "test:browser": "live-server --host=localhost"
-},
-"repository": {
+  },
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/gitguanqi/xqclip.git"
-},
-"keywords": [
+  },
+  "keywords": [
     "clip",
     "xqclip"
-],
-"author": "gitguanqi",
-"license": "MIT",
-"bugs": {
+  ],
+  "author": "gitguanqi",
+  "license": "MIT",
+  "bugs": {
     "url": "https://github.com/gitguanqi/xqclip/issues"
-},
-"homepage": "https://github.com/gitguanqi/xqclip#readme"
-}          
-        
+  },
+  "homepage": "https://github.com/gitguanqi/xqclip#readme",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}

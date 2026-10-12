@@ -12,18 +12,20 @@
 
 ```html
 <!-- Css -->
-<script src="https://xqgj.cc/xqcdn/libs/xqclip/css/xqclip.min.css"></script>
+<link rel="stylesheet" href="https://xqgj.cc/xqcdn/libs/xqclip/css/xqclip.min.css">
 <!-- Browser -->
 <script src="https://xqgj.cc/xqcdn/libs/xqclip/js/xqclip.min.js"></script>
 <!-- es module -->
 <script type="module">
-    import xqclip from '../lib/js/xqclip-esm.min.js';
+    import xqclip from 'https://xqgj.cc/xqcdn/libs/xqclip/js/xqclip-esm.min.js';
 </script>
 ```
 
-**Vue**:
+**npm**:
 
 ```sh
+pnpm add xqclip
+# 或者
 npm i xqclip
 ```
 
@@ -69,12 +71,46 @@ changeBtn.addEventListener('click', function () {
 });
 ```
 
+`pre` 是可选参数：不传时组件依然渲染，只是不显示预览图。裁切结果随时可以通过
+`clip.getCanvasImgData()` 获取，首次选区变化后返回 `{ base64, blob, file }`，
+`onChange` 回调收到的也是同一个对象。
+
+### typescript
+
+包内自带类型声明，无需额外配置：
+
+```ts
+import XqClip from 'xqclip';
+import type { ClipData, XqClipOptions } from 'xqclip';
+
+const options: XqClipOptions = {
+    box: '.corp',
+    url: './img/a1.jpg',
+    pre: '#preview-img',
+    onChange(data: ClipData) {
+        console.log(data.base64, data.file);
+    },
+};
+const clip = new XqClip(options);
+```
+
 ### vue
 
-+ 引入依赖包
+Vue 入口是一个同时兼容 Vue 2 和 Vue 3 的组件与插件。
 
 ```js
-import xqClip from "xqclip";
+// Vue 3
+import { createApp } from 'vue';
+import xqClip from 'xqclip/vue';
+
+createApp(App).use(xqClip);
+```
+
+```js
+// Vue 2
+import Vue from 'vue';
+import xqClip from 'xqclip/vue';
+
 Vue.use(xqClip);
 ```
 
@@ -82,10 +118,9 @@ Vue.use(xqClip);
 
 ```html
 <div class="clip-bg" style="position:relative;">
-    <xq-clip ref="clip" :options="clipOptions"></xq-clip>
-    <img ref="preview" id="small-img" src="" alt="">
-    <button @click="toggleImg">切换图片</button>
-    <button @click="downloadImg">下载图片</button>
+    <xq-clip ref="clip" v-model="url" :options="clipOptions" @change="onClip"></xq-clip>
+    <img id="small-img" src="" alt="">
+    <button @click="replaceImg">切换图片</button>
 </div>
 ```
 
@@ -96,52 +131,52 @@ export default {
     name: 'demo',
     data () {
         return {
+            url: '/img/t1.jpg',
             clipOptions: {
                 boxWin: 400,
                 boxHei: 400,
-                url: "",
-                pre: "#small-img",
+                pre: '#small-img',
                 scale: 16 / 16,
                 showPos: true,
                 scaleImg: true,
             },
         }
     },
-    mounted () {
-        this.initClip();
-    },
     methods: {
-        initClip () {
-            let url = '/img/t1.jpg';
-            this.$refs.clip.replaceImg(url);
+        onClip (data) {
+            console.log(data.base64, data.file);
         },
-        toggleImg () {
-            let url = '/img/t2.png';
-            this.$refs.clip.replaceImg(url);
+        replaceImg () {
+            this.$refs.clip.replaceImg('/img/t2.png');
         },
-        async downloadImg () {
-            let url = this.$refs.preview.src;
-            let extName = url.split('/');
-            extName = extName[extName.length-1];
-            extName = extName.indexOf('?') > -1 ? extName.split('?')[0] : extName;
-            let data = await fetch(url);
-            let blob = await data.blob();
-            let downBtn = document.createElement('a');
-            downBtn.download = 'xqgjs-' + extName;
-            downBtn.href = URL.createObjectURL(blob);
-            document.body.appendChild(downBtn);
-            downBtn.click();
-            document.body.removeChild(downBtn);
-            URL.revokeObjectURL(downBtn.href);
+        reset () {
+            this.$refs.clip.reset();
         },
     }
-
 }
 ```
 
+组件的 props 包括 `options`（与游览器端配置相同，但 `box` 会被忽略，组件使用自己的
+宿主元素）、`modelValue` 和兼容用的 `url`。两种 v-model 写法都支持：优先使用
+`modelValue`，并通过 Vue 2 的 `model` 选项把 `v-model` 映射到它，因此在两个大版本中
+`v-model` 都绑定图片地址，`replaceImg()` 会同步更新该绑定。
+
+事件：`ready`（内核实例已挂载）、`change`（产生裁切结果）、`update:modelValue`。
+方法：`replaceImg(url)`、`reset()`、`getCanvasImgData()`、`getInstance()`。
+
+组件样式由 SFC 自行引入。如果不想用插件而是直接挂载原始 SFC，可以使用
+`import XqClip from 'xqclip/lib/vue/xqclip.vue'`；它未经编译，需要支持 Vue 的打包器，
+与 `xqclip/vue` 的要求一致。
+
+旧版本从包根导出了 Vue 插件，现在根导出为游览器端类（`import XqClip from 'xqclip'`），
+插件迁移到 `xqclip/vue`。
+
 ## 查看示例
 
-运行这个脚本查看展示案例：`npm run test:browser`。
+运行这个脚本查看展示案例：`pnpm test:browser`。
+
+运行 `pnpm test` 执行 DOM 行为测试与打包产物检查，运行 `pnpm typecheck` 检查
+TypeScript 源码。
 
 ![test](https://xqgj.cc/xqclip/test/img/xqclip.jpg)
 
