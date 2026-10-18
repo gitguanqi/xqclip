@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xqclip test pages</title>
+    <link rel="icon" href="./test-icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../lib/css/xqclip.min.css">
+    <link rel="stylesheet" href="./demo.css">
+</head>
+
+<body>
+    <header class="test-header">
+        <div class="test-brand">
+            <img class="test-brand-icon" src="./test-icon.svg" alt="" width="20" height="20">
+            xqclip <span>test pages</span>
+        </div>
+        <nav class="test-nav" aria-label="Test pages">
+            <a href="./browser.html">Browser</a>
+            <a href="./esm.html">ESM</a>
+            <a href="./vue2.html">Vue 2</a>
+            <a href="./vue3.html">Vue 3</a>
+        </nav>
+    </header>
+
+    <main class="test-main">
+        <section class="test-prose">
+            <h1>Standalone bundle checks</h1>
+            <p>
+                Each page loads the committed build directly. The Vue pages use a CDN
+                runtime and mount one component with one XqClip instance.
+            </p>
+        </section>
+
+        <div class="test-links">
+            <div class="test-link-row">
+                <strong>Browser UMD</strong>
+                <span>Global constructor, image switching, crop data, reset, and download.</span>
+                <a class="test-link-button" href="./browser.html">Open</a>
+            </div>
+            <div class="test-link-row">
+                <strong>Browser ESM</strong>
+                <span>Default and named exports from the module bundle.</span>
+                <a class="test-link-button" href="./esm.html">Open</a>
+            </div>
+            <div class="test-link-row">
+                <strong>Vue 2 CDN</strong>
+                <span>Vue 2 global build plus one Options API component instance.</span>
+                <a class="test-link-button" href="./vue2.html">Open</a>
+            </div>
+            <div class="test-link-row">
+                <strong>Vue 3 CDN</strong>
+                <span>Vue 3 global build plus one Options API component instance.</span>
+                <a class="test-link-button" href="./vue3.html">Open</a>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
+

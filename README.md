@@ -173,16 +173,31 @@ the raw SFC instead of the plugin use
 `import XqClip from 'xqclip/lib/vue/xqclip.vue'`; it ships uncompiled, so a
 Vue-aware bundler is required, exactly as for `xqclip/vue`.
 
+### Vue without a build step
+
+The standalone CDN examples load Vue's global build, the UMD xqclip bundle, and
+one plain Options API component. Each page mounts exactly one component with one
+XqClip instance:
+
+- `test/vue2.html`: Vue 2.7 with `new Vue(...).$mount('#app')`.
+- `test/vue3.html`: Vue 3.5 with `Vue.createApp(...).mount('#app')`.
+
+They share `test/vue-xqclip.component.js`, which is a demo helper rather than a
+package export. The package Vue entry above remains the bundler-oriented SFC and
+plugin surface.
+
 Earlier versions exported the Vue plugin from the package root. The root export
 is now the browser class (`import XqClip from 'xqclip'`), and the plugin moved to
 `xqclip/vue`.
 
 ## View xqclip
 
-Run this script to view the demonstration case: `pnpm test:browser`.
+Run `pnpm test:browser` to start the zero-dependency test server. It prints the
+Browser, ESM, Vue 2, and Vue 3 URLs; the index is
+`http://127.0.0.1:4173/test/`.
 
-Run `pnpm test` for the DOM behavior harness and the bundle checks, and
-`pnpm typecheck` for the TypeScript sources.
+Run `pnpm test` for the DOM behavior harness, bundle checks, and demo contracts.
+Run `pnpm typecheck` for the TypeScript sources.
 
 ![test](https://xqgj.cc/xqclip/test/img/xqclip.jpg)
 

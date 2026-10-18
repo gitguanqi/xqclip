@@ -38,8 +38,8 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "node scripts/build.mjs",
     "pretest": "node scripts/build.mjs",
-    "test": "node --test",
-    "test:browser": "live-server --host=localhost"
+    "test": "node --test test/xqclip.test.mjs",
+    "test:browser": "node scripts/demo-server.mjs"
   },
   "repository": {
     "type": "git",

@@ -3,68 +3,109 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xqclip esm test</title>
+    <link rel="icon" href="./test-icon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../lib/css/xqclip.min.css">
-    <style>
-        #preview-img {
-            display: block;
-            margin: 20px;
-        }
-        #download {
-            color: rgb(121, 11, 11);
-            cursor: pointer;
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="./demo.css">
 </head>
 
 <body>
-    <h3>xqclip esm test</h3>
-    <p>使用方法：</p>
-    <ul>
-        <li>
-            1.引入css和js
-        </li>
-        <li>
-            2.new一个方法，传入参数
-        </li>
-        <li>
-            3.开始体验。
-        </li>
-    </ul>
-    <div class="corp"></div>
-    <img id="preview-img" class="clip-bg">
-    <button id="change">切换图片</button>
-    <a id="download">下载图片</a>
+    <header class="test-header">
+        <div class="test-brand">
+            <img class="test-brand-icon" src="./test-icon.svg" alt="" width="20" height="20">
+            xqclip <span>esm test</span>
+        </div>
+        <nav class="test-nav" aria-label="Test pages">
+            <a href="./browser.html">Browser</a>
+            <a href="./esm.html" aria-current="page">ESM</a>
+            <a href="./vue2.html">Vue 2</a>
+            <a href="./vue3.html">Vue 3</a>
+        </nav>
+    </header>
+
+    <main class="test-main">
+        <section class="test-intro">
+            <div>
+                <h1>ES module build</h1>
+                <p>
+                    The module page imports both the default export and the named XqClip
+                    export, verifies that they are the same constructor, and runs the same checks.
+                </p>
+            </div>
+            <span class="test-build-tag">xqclip-esm.min.js</span>
+        </section>
+
+        <div class="test-grid">
+            <section class="test-workbench">
+                <div class="test-toolbar">
+                    <button type="button" id="change">Switch image</button>
+                    <button type="button" id="reset">Reset crop</button>
+                    <a class="test-link-button" id="download" href="#" download aria-disabled="true">
+                        Download crop
+                    </a>
+                </div>
+                <div class="test-stage">
+                    <div class="clip-host" id="clip-host"></div>
+                </div>
+            </section>
+
+            <aside class="test-sidebar">
+                <h2>Runtime checks</h2>
+                <div class="test-status" aria-live="polite">
+                    <span id="status-text">Loading the ES module...</span>
+                </div>
+                <div class="test-preview-frame">
+                    <img class="test-preview-image" id="preview-img" alt="">
+                </div>
+                <dl class="test-meta">
+                    <dt>File</dt><dd id="result-name">unavailable</dd>
+                    <dt>Size</dt><dd id="result-size">unavailable</dd>
+                </dl>
+                <ul class="test-checks">
+                    <li class="test-check" data-check="export">
+                        <span class="test-check-state">PENDING</span>
+                        <span class="test-check-copy">Default and named exports agree.</span>
+                    </li>
+                    <li class="test-check" data-check="instance">
+                        <span class="test-check-state">PENDING</span>
+                        <span class="test-check-copy">Widget resolves its host element.</span>
+                    </li>
+                    <li class="test-check" data-check="image">
+                        <span class="test-check-state">PENDING</span>
+                        <span class="test-check-copy">Source image reaches the canvas.</span>
+                    </li>
+                    <li class="test-check" data-check="crop">
+                        <span class="test-check-state">PENDING</span>
+                        <span class="test-check-copy">Crop produces base64 and a File.</span>
+                    </li>
+                    <li class="test-check" data-check="replace">
+                        <span class="test-check-state">PENDING</span>
+                        <span class="test-check-copy">replaceImg swaps the source.</span>
+                    </li>
+                    <li class="test-check" data-check="reset">
+                        <span class="test-check-state">PENDING</span>
+                        <span class="test-check-copy">reset recalculates geometry.</span>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+    </main>
+
+    <script src="./core-demo.js"></script>
     <script type="module">
-        import xqclip from '../lib/js/xqclip-esm.min.js';
-        let clip = new xqclip({
-            box: '.corp',
-            boxWin: 300,
-            boxHei: 300,
-            url: './img/a1.jpg',
-            pre: '#preview-img',
-            scale: 16/16,
-            showPos: true,
-            scaleImg: true,
+        import xqclip, { XqClip } from '../lib/js/xqclip-esm.min.js';
+
+        document.documentElement.dataset.xqclipModule = 'ready';
+        window.xqclipDemo = createXqClipDemo({
+            XqClip: xqclip,
+            exportError: xqclip === XqClip
+                ? ''
+                : 'The default and named exports are different constructors.',
+            exportDetail: 'default === XqClip.'
         });
-
-        let downloadBtn = document.getElementById('download');
-        let changeBtn = document.getElementById('change');
-        let previewImg = document.getElementById('preview-img');
-        downloadBtn.onclick = function () {  
-            if (previewImg.src == '') return;
-            this.href = previewImg.src;
-            this.download = new Date().getTime();
-        }
-
-        changeBtn.addEventListener('click', function () {
-            clip.replaceImg('./img/a2.png');
-        })
     </script>
 </body>
 
 </html>
-                
+

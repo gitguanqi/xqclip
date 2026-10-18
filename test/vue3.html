@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xqclip Vue 3 CDN test</title>
+    <link rel="icon" href="./test-icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../lib/css/xqclip.min.css">
+    <link rel="stylesheet" href="./demo.css">
+</head>
+
+<body>
+    <header class="test-header">
+        <div class="test-brand">
+            <img class="test-brand-icon" src="./test-icon.svg" alt="" width="20" height="20">
+            xqclip <span>Vue 3 CDN</span>
+        </div>
+        <nav class="test-nav" aria-label="Test pages">
+            <a href="./browser.html">Browser</a>
+            <a href="./esm.html">ESM</a>
+            <a href="./vue2.html">Vue 2</a>
+            <a href="./vue3.html" aria-current="page">Vue 3</a>
+        </nav>
+    </header>
+
+    <main class="test-main">
+        <section class="test-intro">
+            <div>
+                <h1>Vue 3 single component</h1>
+                <p>
+                    Vue 3.5 is loaded from jsDelivr. One Options API component owns one
+                    XqClip instance and releases it through the Vue 3 lifecycle.
+                </p>
+            </div>
+            <span class="test-build-tag">vue@3.5.13</span>
+        </section>
+        <div id="app" v-cloak>
+            <p class="test-boot-note">Loading Vue 3 and xqclip from their CDN/global bundles...</p>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
+    <script src="../lib/js/xqclip.min.js"></script>
+    <script src="./vue-xqclip.component.js"></script>
+    <script>
+        var XqClipDemo = createXqClipComponent(window.xqclip, {
+            options: {
+                boxWin: 320,
+                boxHei: 320,
+                areaWin: 120,
+                areaHei: 120,
+                scale: 1,
+                showPos: true,
+                scaleImg: true
+            }
+        });
+
+        if (window.Vue) {
+            window.xqclipVueDemo = Vue.createApp(XqClipDemo).mount('#app');
+        } else {
+            document.getElementById('app').innerHTML =
+                '<p class="test-boot-note">Vue 3 CDN load failed.</p>';
+        }
+    </script>
+</body>
+
+</html>
+

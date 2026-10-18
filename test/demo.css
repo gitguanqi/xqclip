@@ -1,0 +1,421 @@
+:root {
+    color-scheme: light;
+    --ink: #17252a;
+    --muted: #5b6b70;
+    --line: #d6e1df;
+    --paper: #ffffff;
+    --canvas: #edf4f1;
+    --teal: #0f766e;
+    --teal-soft: #e2f3ef;
+    --amber: #a84f09;
+    --amber-soft: #fff1dc;
+    --danger: #b42318;
+    --danger-soft: #fde8e6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--canvas);
+}
+
+body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--canvas);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.5;
+}
+
+a {
+    color: var(--teal);
+}
+
+button,
+.test-link-button {
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink);
+    background: var(--paper);
+    font: inherit;
+    cursor: pointer;
+}
+
+button:hover,
+.test-link-button:hover {
+    border-color: var(--teal);
+}
+
+button:focus-visible,
+.test-link-button:focus-visible,
+a:focus-visible {
+    outline: 3px solid rgba(15, 118, 110, 0.24);
+    outline-offset: 2px;
+}
+
+button.is-primary {
+    border-color: var(--teal);
+    color: #ffffff;
+    background: var(--teal);
+}
+
+.test-link-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.test-link-button[aria-disabled="true"] {
+    pointer-events: none;
+    opacity: 0.48;
+}
+
+.test-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+}
+
+.test-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.test-brand-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+}
+
+.test-brand span {
+    margin-left: 0;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.test-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px 16px;
+    font-size: 0.9rem;
+}
+
+.test-nav a {
+    text-decoration: none;
+}
+
+.test-nav a[aria-current="page"] {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.test-main {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+}
+
+.test-intro {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.test-intro h1 {
+    margin: 0;
+    font-size: 1.85rem;
+    line-height: 1.2;
+}
+
+.test-intro p {
+    max-width: 660px;
+    margin: 8px 0 0;
+    color: var(--muted);
+}
+
+.test-build-tag {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border: 1px solid #b9dcd4;
+    border-radius: 999px;
+    color: var(--teal);
+    background: var(--teal-soft);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.test-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 18px;
+    align-items: start;
+}
+
+.test-workbench,
+.test-sidebar,
+.test-vue-shell {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+}
+
+.test-workbench {
+    min-width: 0;
+    padding: 16px;
+}
+
+.test-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.test-stage {
+    display: flex;
+    justify-content: center;
+    padding: 14px;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #e7eeeb;
+}
+
+.clip-host {
+    flex: 0 0 auto;
+    max-width: 100%;
+}
+
+.test-sidebar {
+    padding: 16px;
+}
+
+.test-sidebar h2 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+}
+
+.test-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 9px 10px;
+    border: 1px solid #c6ddd8;
+    border-radius: 6px;
+    color: #24544f;
+    background: #f0f8f6;
+    font-size: 0.9rem;
+}
+
+.test-status::before {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--teal);
+    content: "";
+}
+
+.test-preview-frame {
+    display: flex;
+    min-height: 126px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow: auto;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    background: #f6f8f7;
+}
+
+.test-preview-image {
+    display: block;
+    max-width: 100%;
+    background: #eeeeee;
+}
+
+.test-meta {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 10px;
+    margin: 14px 0 0;
+    font-size: 0.82rem;
+}
+
+.test-meta dt {
+    color: var(--muted);
+}
+
+.test-meta dd {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.test-checks {
+    display: grid;
+    gap: 7px;
+    padding: 0;
+    margin: 16px 0 0;
+    list-style: none;
+}
+
+.test-check {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 9px;
+    align-items: start;
+    font-size: 0.84rem;
+}
+
+.test-check-state {
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: #6b5a35;
+    background: var(--amber-soft);
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.test-check-state.is-pass {
+    color: var(--teal);
+    background: var(--teal-soft);
+}
+
+.test-check-state.is-fail {
+    color: var(--danger);
+    background: var(--danger-soft);
+}
+
+.test-vue-shell {
+    padding: 16px;
+}
+
+.test-vue-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.test-vue-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 16px;
+    align-items: start;
+}
+
+.test-prose {
+    max-width: 760px;
+}
+
+.test-prose h2 {
+    margin: 28px 0 8px;
+    font-size: 1.1rem;
+}
+
+.test-prose p,
+.test-prose li {
+    color: var(--muted);
+}
+
+.test-links {
+    display: grid;
+    gap: 0;
+    margin-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.test-link-row {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.test-link-row strong {
+    font-size: 0.96rem;
+}
+
+.test-link-row span {
+    color: var(--muted);
+}
+
+.test-boot-note {
+    padding: 16px;
+    color: var(--muted);
+}
+
+[v-cloak] {
+    display: none !important;
+}
+
+@media (max-width: 760px) {
+    .test-header,
+    .test-intro {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .test-nav {
+        justify-content: flex-start;
+    }
+
+    .test-main {
+        padding: 20px 12px 36px;
+    }
+
+    .test-intro h1 {
+        font-size: 1.55rem;
+    }
+
+    .test-grid,
+    .test-vue-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .test-workbench,
+    .test-sidebar,
+    .test-vue-shell {
+        padding: 12px;
+    }
+
+    .test-stage {
+        justify-content: flex-start;
+        padding: 10px;
+    }
+
+    .test-link-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .test-link-row span {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}
+

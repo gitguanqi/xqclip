@@ -168,15 +168,27 @@ export default {
 `import XqClip from 'xqclip/lib/vue/xqclip.vue'`；它未经编译，需要支持 Vue 的打包器，
 与 `xqclip/vue` 的要求一致。
 
+### Vue 免构建 CDN 用法
+
+仓库内的 CDN 示例直接加载 Vue 全局构建、xqclip UMD 包和一个普通 Options API
+组件。每个页面只挂载一个组件和一个 XqClip 实例：
+
+- `test/vue2.html`：Vue 2.7，使用 `new Vue(...).$mount('#app')`。
+- `test/vue3.html`：Vue 3.5，使用 `Vue.createApp(...).mount('#app')`。
+
+两页共用 `test/vue-xqclip.component.js`。它是示例辅助文件，不属于包的导出接口；
+上面的 `xqclip/vue` SFC 与插件仍用于打包器项目。
+
 旧版本从包根导出了 Vue 插件，现在根导出为游览器端类（`import XqClip from 'xqclip'`），
 插件迁移到 `xqclip/vue`。
 
 ## 查看示例
 
-运行这个脚本查看展示案例：`pnpm test:browser`。
+运行 `pnpm test:browser` 启动零依赖测试服务器。终端会输出 Browser、ESM、Vue 2
+和 Vue 3 的地址，索引页为 `http://127.0.0.1:4173/test/`。
 
-运行 `pnpm test` 执行 DOM 行为测试与打包产物检查，运行 `pnpm typecheck` 检查
-TypeScript 源码。
+运行 `pnpm test` 执行 DOM 行为测试、打包产物检查与示例契约检查，运行
+`pnpm typecheck` 检查 TypeScript 源码。
 
 ![test](https://xqgj.cc/xqclip/test/img/xqclip.jpg)
 

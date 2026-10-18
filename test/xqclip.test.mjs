@@ -443,3 +443,153 @@ test('the shipped component defers mounting and tears the widget down', async ()
     restore();
   }
 });
+test('the standalone demos keep the UMD, ESM, and Vue CDN contracts', async () => {
+  const browser = await readFile(at('test/browser.html'), 'utf8');
+  const esm = await readFile(at('test/esm.html'), 'utf8');
+  const vue2 = await readFile(at('test/vue2.html'), 'utf8');
+  const vue3 = await readFile(at('test/vue3.html'), 'utf8');
+  const index = await readFile(at('test/index.html'), 'utf8');
+
+  assert.match(browser, /<script src="\.\.\/lib\/js\/xqclip\.min\.js"><\/script>/);
+  assert.match(browser, /createXqClipDemo\(\{/);
+  assert.match(browser, /data-check="crop"/);
+
+  assert.match(esm, /<script type="module">/);
+  assert.match(
+    esm,
+    /import xqclip, \{ XqClip \} from '\.\.\/lib\/js\/xqclip-esm\.min\.js';/,
+  );
+  assert.match(esm, /xqclip === XqClip/);
+
+  assert.match(vue2, /vue@2\.7\.16\/dist\/vue\.min\.js/);
+  assert.match(vue2, /new Vue\(XqClipDemo\)\.\$mount\('#app'\)/);
+  assert.match(vue3, /vue@3\.5\.13\/dist\/vue\.global\.prod\.js/);
+  assert.match(vue3, /Vue\.createApp\(XqClipDemo\)\.mount\('#app'\)/);
+
+  for (const page of [vue2, vue3]) {
+    assert.match(page, /\.\.\/lib\/js\/xqclip\.min\.js/);
+    assert.match(page, /vue-xqclip\.component\.js/);
+    assert.match(page, /boxWin: 320/);
+  }
+
+  assert.match(index, /href="\.\/browser\.html"/);
+  assert.match(index, /href="\.\/esm\.html"/);
+  assert.match(index, /href="\.\/vue2\.html"/);
+  assert.match(index, /href="\.\/vue3\.html"/);
+});
+
+test('the CDN Vue component owns one core instance and tears it down once', () => {
+  const createXqClipComponent = require(at('test/vue-xqclip.component.js'));
+  const previousWindow = globalThis.window;
+  const calls = { constructed: 0, replace: [], reset: 0, destroy: 0, crops: 0 };
+
+  globalThis.window = {
+    location: { href: 'http://localhost/test/' },
+    setInterval: () => 1,
+    clearInterval: () => {},
+  };
+
+  class FakeXqClip {
+    constructor(options) {
+      calls.constructed += 1;
+      this.options = options;
+      this.box = options.box;
+      this.imgInfo = { elem: { src: options.url } };
+    }
+
+    replaceImg(url) {
+      calls.replace.push(url);
+      return true;
+    }
+
+    reset() {
+      calls.reset += 1;
+    }
+
+    getAreaData() {
+      calls.crops += 1;
+    }
+
+    destroy() {
+      calls.destroy += 1;
+    }
+  }
+
+  try {
+    const component = createXqClipComponent(FakeXqClip, {
+      firstUrl: './img/a1.jpg',
+      secondUrl: './img/a2.png',
+      options: { boxWin: 320, boxHei: 320 },
+    });
+    const host = { className: 'host' };
+    const preview = { nodeName: 'IMG' };
+    const emitted = [];
+    const ctx = {
+      ...component.data(),
+      $refs: { host, preview },
+      $emit: (name, payload) => emitted.push([name, payload]),
+    };
+    for (const [name, method] of Object.entries(component.methods)) {
+      ctx[name] = method.bind(ctx);
+    }
+
+    const first = ctx.createClip();
+    const second = ctx.createClip();
+    assert.equal(first, second);
+    assert.equal(calls.constructed, 1);
+    assert.equal(first.box, host);
+    assert.equal(first.options.pre, preview);
+    assert.equal(first.options.url, './img/a1.jpg');
+    assert.deepEqual(emitted[0], ['ready', first]);
+
+    const data = {
+      base64: 'data:image/jpeg;base64,QQ==',
+      blob: 'blob:crop',
+      file: { name: 'crop.jpg', size: 1 },
+    };
+    first.options.onChange(data);
+    assert.equal(ctx.result, data);
+    assert.equal(emitted.some(([name]) => name === 'change'), true);
+    assert.equal(component.computed.downloadHref.call(ctx), data.base64);
+
+    assert.equal(ctx.switchImage(), true);
+    assert.deepEqual(calls.replace, ['./img/a2.png']);
+    assert.equal(ctx.currentUrl, './img/a2.png');
+
+    ctx.resetClip();
+    assert.equal(calls.reset, 1);
+
+    component.beforeDestroy.call(ctx);
+    component.unmounted.call(ctx);
+    assert.equal(calls.destroy, 1);
+    assert.equal(ctx._xqclip, null);
+  } finally {
+    globalThis.window = previousWindow;
+  }
+});
+test('the standalone pages share the test icon and favicon', async () => {
+  const pages = [
+    'test/browser.html',
+    'test/esm.html',
+    'test/vue2.html',
+    'test/vue3.html',
+    'test/index.html',
+  ];
+  const icon = await readFile(at('test/test-icon.svg'), 'utf8');
+  assert.match(icon, /^<svg\b/);
+  assert.match(icon, /M10 2v7\.527/);
+
+  for (const page of pages) {
+    const html = await readFile(at(page), 'utf8');
+    assert.match(
+      html,
+      /<link rel="icon" href="\.\/test-icon\.svg" type="image\/svg\+xml">/,
+      `${page} should declare the shared favicon`,
+    );
+    assert.match(
+      html,
+      /class="test-brand-icon" src="\.\/test-icon\.svg" alt="" width="20" height="20"/,
+      `${page} should render the shared header icon`,
+    );
+  }
+});
