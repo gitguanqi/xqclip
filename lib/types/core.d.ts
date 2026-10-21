@@ -5,6 +5,10 @@ type DragState = {
     mode: 'scale';
     startX: number;
     startY: number;
+    startWidth: number;
+    startHeight: number;
+    startLeft: number;
+    startTop: number;
 };
 /**
  * Image cropper that injects its own markup into a host element. Everything it
@@ -90,10 +94,12 @@ export declare class XqClip {
     private handleWheel;
     /** Moves the crop box, or resizes it when the drag started on the handle. */
     moveArea(event: Event): void;
+    /** Writes one geometry result to every visual and data-facing surface. */
+    private updateAreaRect;
     /** Shadow sizes after a drag, before the next geometry read. */
     calcShadowElem(): void;
     /** Shadow sizes while the crop box is being resized. */
-    changeShadowElem(areaMoveWin: number): void;
+    changeShadowElem(areaMoveWin: number, areaMoveHei?: number): void;
     /** Copies the selected region into the preview canvas and preview image. */
     getAreaData(): void;
     /** Publishes the crop as a data url, an object url, and a file. */

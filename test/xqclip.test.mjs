@@ -298,6 +298,89 @@ test('the UMD build crops a region and reports it', () => {
   }
 });
 
+test('moving and resizing keep the crop, masks, and sampled region in sync', () => {
+  const dom = createStubDom();
+  const restore = installGlobals(dom);
+  try {
+    const XqClip = require(at('lib/js/xqclip.js'));
+    const instance = new XqClip(CROP_OPTIONS);
+    dom.images[0].onload();
+
+    const clipBox = dom.find('.clip-box');
+    const clipArea = dom.find('.clip-img-area');
+    const scaleHandle = dom.find('.clip-img-scale');
+    const topShadow = dom.find('.clip-img-shadow-top');
+    const rightShadow = dom.find('.clip-img-shadow-right');
+    const bottomShadow = dom.find('.clip-img-shadow-bottom');
+    const leftShadow = dom.find('.clip-img-shadow-left');
+    const canvas = dom.find('.clip-canvas');
+
+    clipArea.offsetWidth = 100;
+    clipArea.offsetHeight = 100;
+    clipArea.offsetLeft = 100;
+    clipArea.offsetTop = 100;
+
+    dom.handler(clipBox, 'mousedown')({ target: { className: '' } });
+    dom.handler(clipBox, 'mousemove')({ clientX: 120, clientY: 130 });
+
+    assert.equal(clipArea.style.left, '70px');
+    assert.equal(clipArea.style.top, '80px');
+    assert.deepEqual(
+      {
+        topWidth: topShadow.style.width,
+        topHeight: topShadow.style.height,
+        topLeft: topShadow.style.left,
+        rightWidth: rightShadow.style.width,
+        bottomHeight: bottomShadow.style.height,
+        leftWidth: leftShadow.style.width,
+      },
+      {
+        topWidth: '100px',
+        topHeight: '80px',
+        topLeft: '70px',
+        rightWidth: '130px',
+        bottomHeight: '120px',
+        leftWidth: '70px',
+      },
+      'all four masks follow the moved crop box',
+    );
+    assert.deepEqual(
+      canvas.context.lastRegion,
+      { x: 70, y: 80, w: 100, h: 100 },
+      'the sampled crop follows the moved crop box',
+    );
+
+    // The real browser reports the size assigned by the previous move.
+    clipArea.offsetWidth = 100;
+    clipArea.offsetHeight = 100;
+    clipArea.offsetLeft = 70;
+    clipArea.offsetTop = 80;
+    dom.handler(scaleHandle, 'mousedown')({ clientX: 170, clientY: 180 });
+    dom.handler(clipBox, 'mousemove')({ clientX: 180, clientY: 190 });
+    assert.equal(clipArea.style.width, '110px');
+    assert.equal(clipArea.style.height, '110px');
+
+    clipArea.offsetWidth = 110;
+    clipArea.offsetHeight = 110;
+    dom.handler(clipBox, 'mousemove')({ clientX: 200, clientY: 210 });
+
+    assert.equal(clipArea.style.width, '130px', 'resizing uses the original size');
+    assert.equal(clipArea.style.height, '130px');
+    assert.equal(topShadow.style.width, '130px');
+    assert.equal(rightShadow.style.width, '100px');
+    assert.equal(bottomShadow.style.height, '90px');
+    assert.deepEqual(
+      canvas.context.lastRegion,
+      { x: 70, y: 80, w: 130, h: 130 },
+      'the sampled crop follows the resized crop box',
+    );
+
+    instance.destroy();
+  } finally {
+    restore();
+  }
+});
+
 test('the ESM builds load without a DOM and keep both export names', async () => {
   const readable = await import(pathToFileURL(at('lib/js/xqclip-esm.mjs')).href);
   const minified = await import(pathToFileURL(at('lib/js/xqclip-esm.min.mjs')).href);
