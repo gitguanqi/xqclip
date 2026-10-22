@@ -676,3 +676,51 @@ test('the standalone pages share the test icon and favicon', async () => {
     );
   }
 });
+
+test('package metadata exposes Agent docs and the xqclip skill', async () => {
+  const pkg = JSON.parse(await readFile(at('package.json'), 'utf8'));
+  assert.equal(pkg.llms, './llms.txt');
+  assert.equal(pkg.agents, './skills/xqclip/SKILL.md');
+  assert.ok(pkg.files.includes('llms.txt'));
+  assert.ok(pkg.files.includes('skills'));
+
+  const llms = await readFile(at(pkg.llms), 'utf8');
+  for (const name of [
+    'XqClip',
+    'ClipData',
+    'ClipImageInfo',
+    'ClipRect',
+    'VueApp',
+    'XqClipOptions',
+    'XqClipVuePlugin',
+    'component',
+  ]) {
+    assert.match(llms, new RegExp(`\\b${name}\\b`), `llms.txt should mention ${name}`);
+  }
+  for (const option of [
+    'box',
+    'url',
+    'pre',
+    'boxWin',
+    'boxHei',
+    'areaWin',
+    'areaHei',
+    'scale',
+    'showPos',
+    'scaleImg',
+    'onChange',
+  ]) {
+    assert.match(llms, new RegExp(`\\b${option}\\b`), `llms.txt should mention ${option}`);
+  }
+  assert.match(llms, /replaceImg/);
+  assert.match(llms, /getCanvasImgData/);
+  assert.match(llms, /destroy/);
+  assert.match(llms, /ready/);
+  assert.match(llms, /update:modelValue/);
+
+  const skill = await readFile(at(pkg.agents), 'utf8');
+  assert.match(skill, /^---\nname: xqclip\ndescription: .+\n---\n/);
+  assert.match(skill, /\.\.\/\.\.\/llms\.txt/);
+  assert.match(skill, /cross-origin/i);
+  assert.match(skill, /destroy\(\)/);
+});

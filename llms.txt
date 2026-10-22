@@ -1,0 +1,104 @@
+# xqclip
+
+Browser image cropper with a framework-free `XqClip` class and a Vue 2/3 component and plugin.
+
+## Install
+
+```sh
+pnpm add xqclip
+```
+
+## Exported API
+
+Package root:
+
+- Default export and named export `XqClip`: image cropper class.
+- Types: `ClipData`, `ClipImageInfo`, `ClipRect`, `VueApp`, `XqClipOptions`, `XqClipVuePlugin`.
+
+Vue entry `xqclip/vue`:
+
+- Default export: plugin with `install(app)`.
+- Named export `component`: the `XqClip` Vue component.
+
+Styles:
+
+- `xqclip/css/xqclip.css`
+- `xqclip/css/xqclip.min.css`
+
+## Core Class
+
+```ts
+import XqClip from 'xqclip';
+import 'xqclip/css/xqclip.min.css';
+
+const cropper = new XqClip({
+  box: '#cropper',
+  url: '/images/photo.jpg',
+  pre: '#preview',
+  boxWin: 400,
+  boxHei: 400,
+  areaWin: 160,
+  areaHei: 160,
+  scale: 1,
+  showPos: true,
+  scaleImg: true,
+  onChange(data) {
+    console.log(data.base64, data.file);
+  },
+});
+```
+
+Required options at runtime:
+
+- `box`: host selector or element. The default `.clip-box` is rejected.
+- `url`: initial image URL.
+
+Key options:
+
+- `pre`: optional external preview image selector or element.
+- `boxWin`, `boxHei`: canvas size in pixels, default `400`.
+- `areaWin`, `areaHei`: initial crop size, default `100`.
+- `scale`: crop aspect ratio, default `1`.
+- `showPos`: show crop position and size labels, default `true`.
+- `scaleImg`: enable wheel zoom, default `true`.
+- `onChange`: receives `{ base64, blob, file }` whenever the crop changes.
+
+Common instance methods:
+
+- `replaceImg(url): boolean`
+- `reset(): void`
+- `getCanvasImgData(): ClipData | null`
+- `destroy(): void`
+
+Call `destroy()` when the host is removed to detach listeners and release the current object URL. Canvas cropping requires CORS-enabled images.
+
+## Vue 2/3
+
+```ts
+import { createApp } from 'vue';
+import XqClipPlugin from 'xqclip/vue';
+
+createApp(App).use(XqClipPlugin);
+```
+
+```vue
+<template>
+  <xq-clip
+    v-model="imageUrl"
+    :options="{ pre: '#preview', boxWin: 400, boxHei: 400 }"
+    @change="onChange"
+  />
+</template>
+```
+
+Component contract:
+
+- Props: `options`, `modelValue`, and legacy `url`.
+- Events: `ready(instance)`, `change(data)`, `update:modelValue(url)`.
+- Methods: `replaceImg(url)`, `reset()`, `getCanvasImgData()`, `getInstance()`.
+
+The component owns its host element, so `options.box` is ignored. It also reserves `options.onChange`; use the component's `change` event instead. `modelValue` takes precedence over the legacy `url` prop.
+
+## Result Shape
+
+`ClipData` is `{ base64: string; blob: string; file: File }`. The `blob` value is an object URL managed by the latest cropper result; use it promptly and call `destroy()` during teardown.
