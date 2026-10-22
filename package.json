@@ -1,6 +1,6 @@
 {
   "name": "xqclip",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "This is a js package that provides image cutting and export.",
   "llms": "./llms.txt",
   "agents": "./skills/xqclip/SKILL.md",
@@ -44,6 +44,8 @@
     "pretest": "node scripts/build.mjs",
     "test": "node --test test/xqclip.test.mjs",
     "test:browser": "node scripts/demo-server.mjs",
+    "version:bump": "node scripts/bump-version.mjs",
+    "version:dry-run": "node scripts/bump-version.mjs --dry-run",
     "commitlint": "commitlint --edit",
     "prepare": "husky"
   },

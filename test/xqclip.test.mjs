@@ -9,6 +9,8 @@ import { dirname, resolve } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import test from 'node:test';
 
+import { bumpVersion } from '../scripts/bump-version.mjs';
+
 const require = createRequire(import.meta.url);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const at = (...parts) => resolve(root, ...parts);
@@ -723,4 +725,13 @@ test('package metadata exposes Agent docs and the xqclip skill', async () => {
   assert.match(skill, /\.\.\/\.\.\/llms\.txt/);
   assert.match(skill, /cross-origin/i);
   assert.match(skill, /destroy\(\)/);
+});
+
+test('package exposes reusable semantic version bump commands', async () => {
+  const pkg = JSON.parse(await readFile(at('package.json'), 'utf8'));
+  assert.equal(pkg.scripts['version:bump'], 'node scripts/bump-version.mjs');
+  assert.equal(pkg.scripts['version:dry-run'], 'node scripts/bump-version.mjs --dry-run');
+  assert.equal(bumpVersion('1.2.3', 'patch'), '1.2.4');
+  assert.equal(bumpVersion('1.2.3', 'minor'), '1.3.0');
+  assert.equal(bumpVersion('1.2.3', 'major'), '2.0.0');
 });
